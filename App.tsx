@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard';
 import CostExplorer from './components/CostExplorer';
 import OptimizationHub from './components/OptimizationHub';
 import Anomalies from './components/Anomalies';
+import Settings from './components/Settings';
 import { MOCK_ANOMALIES, MOCK_OPPORTUNITIES } from './constants';
 import { Bell, Search, Menu } from 'lucide-react';
 
@@ -25,6 +26,8 @@ const App: React.FC = () => {
         return <OptimizationHub opportunities={MOCK_OPPORTUNITIES} />;
       case 'anomalies':
         return <Anomalies anomalies={MOCK_ANOMALIES} />;
+      case 'settings':
+        return <Settings />;
       default:
         return <Dashboard 
           onNavigate={setCurrentView} 
@@ -95,6 +98,7 @@ const App: React.FC = () => {
              <button onClick={() => { setCurrentView('dashboard'); setMobileMenuOpen(false); }} className="block text-slate-300 py-3">Overview</button>
              <button onClick={() => { setCurrentView('explorer'); setMobileMenuOpen(false); }} className="block text-slate-300 py-3">Cost Explorer</button>
              <button onClick={() => { setCurrentView('anomalies'); setMobileMenuOpen(false); }} className="block text-slate-300 py-3">Anomalies</button>
+             <button onClick={() => { setCurrentView('settings'); setMobileMenuOpen(false); }} className="block text-slate-300 py-3">Settings</button>
            </div>
         </div>
       )}

@@ -50,7 +50,14 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView }) => {
         <div className="mt-8 mb-4 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
           Settings
         </div>
-        <button className="w-full flex items-center px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+        <button 
+          onClick={() => onChangeView('settings')}
+          className={`w-full flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            currentView === 'settings' 
+              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/50' 
+              : 'hover:bg-slate-800 hover:text-white'
+          }`}
+        >
            <Settings size={18} className="mr-3" />
            Configuration
         </button>
