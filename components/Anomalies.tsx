@@ -1,27 +1,47 @@
 import React, { useState } from 'react';
 import { Anomaly } from '../types';
-import { AlertTriangle, Check, MessageSquare, Search, ChevronDown, Activity } from 'lucide-react';
+import { AlertTriangle, Check, MessageSquare, Search, ChevronDown, Activity, ExternalLink } from 'lucide-react';
 import { analyzeAnomaly } from '../services/geminiService';
 
 interface AnomaliesProps {
   anomalies: Anomaly[];
+  onDismissAnomaly: (id: string) => void;
 }
 
-const Anomalies: React.FC<AnomaliesProps> = ({ anomalies }) => {
+const Anomalies: React.FC<AnomaliesProps> = ({ anomalies, onDismissAnomaly }) => {
   const [selectedAnomaly, setSelectedAnomaly] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<string>('');
   const [analyzing, setAnalyzing] = useState(false);
+  const [ticketStatus, setTicketStatus] = useState<'idle' | 'creating' | 'created'>('idle');
 
   const handleAnalyze = async (anomaly: Anomaly) => {
     if (selectedAnomaly === anomaly.id && analysis) return; 
     
     setSelectedAnomaly(anomaly.id);
+    setTicketStatus('idle'); // Reset ticket status for new selection
     setAnalyzing(true);
     setAnalysis('');
     
     const result = await analyzeAnomaly(anomaly);
     setAnalysis(result);
     setAnalyzing(false);
+  };
+
+  const handleCreateTicket = () => {
+    setTicketStatus('creating');
+    // Simulate API call to Jira
+    setTimeout(() => {
+      setTicketStatus('created');
+    }, 1500);
+  };
+
+  const handleDismiss = () => {
+    if (selectedAnomaly) {
+      onDismissAnomaly(selectedAnomaly);
+      setSelectedAnomaly(null);
+      setAnalysis('');
+      setTicketStatus('idle');
+    }
   };
 
   return (
@@ -110,8 +130,26 @@ const Anomalies: React.FC<AnomaliesProps> = ({ anomalies }) => {
                  )}
               </div>
               <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end space-x-3">
-                 <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100">Dismiss</button>
-                 <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">Create Jira Ticket</button>
+                 <button 
+                   onClick={handleDismiss}
+                   className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+                 >
+                   Dismiss
+                 </button>
+                 <button 
+                   onClick={handleCreateTicket}
+                   disabled={ticketStatus !== 'idle'}
+                   className={`px-4 py-2 text-white rounded-lg text-sm font-medium transition-all flex items-center min-w-[150px] justify-center
+                     ${ticketStatus === 'created' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-indigo-600 hover:bg-indigo-700'}
+                     ${ticketStatus === 'creating' ? 'opacity-75 cursor-wait' : ''}
+                   `}
+                 >
+                    {ticketStatus === 'creating' && <Activity className="animate-spin mr-2" size={16} />}
+                    {ticketStatus === 'created' && <Check className="mr-2" size={16} />}
+                    {ticketStatus === 'idle' && 'Create Jira Ticket'}
+                    {ticketStatus === 'creating' && 'Creating...'}
+                    {ticketStatus === 'created' && 'Ticket Created'}
+                 </button>
               </div>
             </div>
           ) : (

@@ -5,11 +5,34 @@ export const MOCK_COST_DATA: CostMetric[] = Array.from({ length: 30 }).map((_, i
   date.setDate(date.getDate() - (29 - i));
   const dateStr = date.toISOString().split('T')[0];
   
+  // Helpers for random data
+  const regions = ['us-east-1', 'eu-west-1', 'us-central1', 'ap-southeast-1'];
+  const accounts = ['production', 'staging', 'dev-sandbox', 'data-analytics'];
+  const tags = ['env:prod', 'env:dev', 'team:platform', 'project:alpha'];
+  
+  const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+
   return [
-    { date: dateStr, amount: Math.floor(Math.random() * 500) + 1200, currency: 'USD', provider: CloudProvider.AWS, service: 'EC2' },
-    { date: dateStr, amount: Math.floor(Math.random() * 200) + 400, currency: 'USD', provider: CloudProvider.AWS, service: 'RDS' },
-    { date: dateStr, amount: Math.floor(Math.random() * 100) + 300, currency: 'USD', provider: CloudProvider.GCP, service: 'BigQuery' },
-    { date: dateStr, amount: Math.floor(Math.random() * 150) + 200, currency: 'USD', provider: CloudProvider.AZURE, service: 'Virtual Machines' },
+    { 
+      date: dateStr, amount: Math.floor(Math.random() * 500) + 1200, currency: 'USD', 
+      provider: CloudProvider.AWS, service: 'EC2', 
+      region: pick(regions), account: 'production', tag: 'env:prod' 
+    },
+    { 
+      date: dateStr, amount: Math.floor(Math.random() * 200) + 400, currency: 'USD', 
+      provider: CloudProvider.AWS, service: 'RDS', 
+      region: pick(regions), account: 'production', tag: 'env:prod' 
+    },
+    { 
+      date: dateStr, amount: Math.floor(Math.random() * 100) + 300, currency: 'USD', 
+      provider: CloudProvider.GCP, service: 'BigQuery', 
+      region: 'us-central1', account: 'data-analytics', tag: 'project:alpha' 
+    },
+    { 
+      date: dateStr, amount: Math.floor(Math.random() * 150) + 200, currency: 'USD', 
+      provider: CloudProvider.AZURE, service: 'Virtual Machines', 
+      region: 'eu-west-1', account: 'staging', tag: 'env:dev' 
+    },
   ];
 }).flat();
 

@@ -11,6 +11,9 @@ export interface CostMetric {
   currency: string;
   provider: CloudProvider;
   service: string;
+  region: string;
+  account: string;
+  tag: string;
 }
 
 export interface OptimizationOpportunity {

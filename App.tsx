@@ -5,34 +5,76 @@ import CostExplorer from './components/CostExplorer';
 import OptimizationHub from './components/OptimizationHub';
 import Anomalies from './components/Anomalies';
 import Settings from './components/Settings';
-import { MOCK_ANOMALIES, MOCK_OPPORTUNITIES } from './constants';
+import { MOCK_ANOMALIES, MOCK_OPPORTUNITIES, MOCK_COST_DATA } from './constants';
 import { Bell, Search, Menu } from 'lucide-react';
+import { CostMetric, Anomaly } from './types';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [fixedOpportunityIds, setFixedOpportunityIds] = useState<Set<string>>(new Set());
+  
+  // Lifted state for Cost Data to ensure persistence across views
+  const [costData, setCostData] = useState<CostMetric[]>(MOCK_COST_DATA);
+
+  // Lifted state for Anomalies
+  const [anomalies, setAnomalies] = useState<Anomaly[]>(MOCK_ANOMALIES);
+
+  const handleFixOpportunity = (id: string) => {
+    setFixedOpportunityIds(prev => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  };
+
+  const handleDeleteService = (key: string) => {
+    // Key format is expected to be `${provider}-${service}`
+    setCostData(prev => prev.filter(item => `${item.provider}-${item.service}` !== key));
+  };
+
+  const handleAddService = (newMetric: CostMetric) => {
+    setCostData(prev => [newMetric, ...prev]);
+  };
+
+  const handleDismissAnomaly = (id: string) => {
+    setAnomalies(prev => prev.filter(a => a.id !== id));
+  };
 
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
         return <Dashboard 
           onNavigate={setCurrentView} 
-          anomalies={MOCK_ANOMALIES} 
-          opportunities={MOCK_OPPORTUNITIES} 
+          anomalies={anomalies} 
+          opportunities={MOCK_OPPORTUNITIES}
+          fixedOpportunityIds={fixedOpportunityIds}
         />;
       case 'explorer':
-        return <CostExplorer />;
+        return <CostExplorer 
+          data={costData}
+          onDeleteService={handleDeleteService}
+          onAddService={handleAddService}
+        />;
       case 'optimization':
-        return <OptimizationHub opportunities={MOCK_OPPORTUNITIES} />;
+        return <OptimizationHub 
+          opportunities={MOCK_OPPORTUNITIES} 
+          fixedOpportunityIds={fixedOpportunityIds}
+          onFixOpportunity={handleFixOpportunity}
+        />;
       case 'anomalies':
-        return <Anomalies anomalies={MOCK_ANOMALIES} />;
+        return <Anomalies 
+          anomalies={anomalies} 
+          onDismissAnomaly={handleDismissAnomaly}
+        />;
       case 'settings':
         return <Settings />;
       default:
         return <Dashboard 
           onNavigate={setCurrentView} 
-          anomalies={MOCK_ANOMALIES} 
+          anomalies={anomalies} 
           opportunities={MOCK_OPPORTUNITIES} 
+          fixedOpportunityIds={fixedOpportunityIds}
         />;
     }
   };

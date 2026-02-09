@@ -1,33 +1,33 @@
 import React, { useState } from 'react';
-import { MOCK_OPPORTUNITIES } from '../constants';
 import { CheckCircle, AlertCircle, ArrowRight, Zap, Loader2, Check } from 'lucide-react';
 import { OptimizationOpportunity } from '../types';
 
 interface OptimizationHubProps {
   opportunities: OptimizationOpportunity[];
+  fixedOpportunityIds: Set<string>;
+  onFixOpportunity: (id: string) => void;
 }
 
-const OptimizationHub: React.FC<OptimizationHubProps> = ({ opportunities }) => {
+const OptimizationHub: React.FC<OptimizationHubProps> = ({ 
+  opportunities, 
+  fixedOpportunityIds, 
+  onFixOpportunity 
+}) => {
   const [fixingId, setFixingId] = useState<string | null>(null);
-  const [fixedIds, setFixedIds] = useState<Set<string>>(new Set());
 
   const handleFix = (id: string) => {
     setFixingId(id);
     // Simulate API call delay
     setTimeout(() => {
       setFixingId(null);
-      setFixedIds(prev => {
-        const next = new Set(prev);
-        next.add(id);
-        return next;
-      });
+      onFixOpportunity(id);
     }, 1500);
   };
 
   // Calculate dynamic stats
   const totalPotential = opportunities.reduce((a, b) => a + b.estimatedSavings, 0);
   const realizedNow = opportunities
-    .filter(o => fixedIds.has(o.id))
+    .filter(o => fixedOpportunityIds.has(o.id))
     .reduce((a, b) => a + b.estimatedSavings, 0);
   const pending = totalPotential - realizedNow;
   
@@ -42,7 +42,7 @@ const OptimizationHub: React.FC<OptimizationHubProps> = ({ opportunities }) => {
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Optimization Hub</h2>
           <p className="text-slate-500 mt-1">
-            We identified <span className="font-semibold text-slate-900">{opportunities.length - fixedIds.size}</span> opportunities 
+            We identified <span className="font-semibold text-slate-900">{opportunities.length - fixedOpportunityIds.size}</span> opportunities 
             to save <span className="font-semibold text-emerald-600">${pending.toLocaleString()}</span> monthly.
           </p>
         </div>
@@ -52,7 +52,7 @@ const OptimizationHub: React.FC<OptimizationHubProps> = ({ opportunities }) => {
         {/* Main List */}
         <div className="lg:col-span-2 space-y-4">
           {opportunities.map((opp) => {
-            const isFixed = fixedIds.has(opp.id);
+            const isFixed = fixedOpportunityIds.has(opp.id);
             const isFixing = fixingId === opp.id;
 
             return (

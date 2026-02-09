@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   BarChart, Bar, Legend 
@@ -15,14 +15,34 @@ interface DashboardProps {
   onNavigate: (view: string) => void;
   anomalies: Anomaly[];
   opportunities: OptimizationOpportunity[];
+  fixedOpportunityIds: Set<string>;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunities }) => {
+const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunities, fixedOpportunityIds }) => {
   const [aiSummary, setAiSummary] = useState<string>('');
   const [loadingAi, setLoadingAi] = useState<boolean>(false);
 
+  // Filter out fixed opportunities to show accurate potential savings
+  const activeOpportunities = useMemo(() => {
+    return opportunities.filter(op => !fixedOpportunityIds.has(op.id));
+  }, [opportunities, fixedOpportunityIds]);
+
+  const savingsPotential = useMemo(() => {
+    return activeOpportunities.reduce((sum, op) => sum + op.estimatedSavings, 0);
+  }, [activeOpportunities]);
+
+  // Calculate realized savings from fixed opportunities
+  const realizedSavings = useMemo(() => {
+    return opportunities
+      .filter(op => fixedOpportunityIds.has(op.id))
+      .reduce((sum, op) => sum + op.estimatedSavings, 0);
+  }, [opportunities, fixedOpportunityIds]);
+
+  // Dynamic forecast based on base forecast minus realized savings
+  const currentForecast = KPIS.forecast - realizedSavings;
+
   // Aggregating data for the chart
-  const chartData = React.useMemo(() => {
+  const chartData = useMemo(() => {
     const dailyMap = new Map<string, number>();
     MOCK_COST_DATA.forEach(item => {
       const current = dailyMap.get(item.date) || 0;
@@ -35,7 +55,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunit
 
   const handleGenerateInsight = async () => {
     setLoadingAi(true);
-    const summary = await generateExecutiveSummary(KPIS.totalSpend, KPIS.forecast, anomalies, opportunities);
+    // Use currentForecast and activeOpportunities for AI summary to reflect current state
+    const summary = await generateExecutiveSummary(KPIS.totalSpend, currentForecast, anomalies, activeOpportunities);
     setAiSummary(summary);
     setLoadingAi(false);
   };
@@ -69,7 +90,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunit
             <div>
               <p className="text-sm font-medium text-slate-500">Forecast</p>
               <h3 className="text-2xl font-bold text-slate-900 mt-2">
-                ${KPIS.forecast.toLocaleString()}
+                ${currentForecast.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </h3>
             </div>
             <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
@@ -77,10 +98,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunit
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm">
-            <span className={`font-medium flex items-center ${KPIS.forecast > KPIS.budget ? 'text-amber-600' : 'text-emerald-600'}`}>
-              {Math.abs(((KPIS.forecast - KPIS.budget) / KPIS.budget) * 100).toFixed(1)}%
+            <span className={`font-medium flex items-center ${currentForecast > KPIS.budget ? 'text-amber-600' : 'text-emerald-600'}`}>
+              {Math.abs(((currentForecast - KPIS.budget) / KPIS.budget) * 100).toFixed(1)}%
             </span>
-            <span className="text-slate-400 ml-2">{KPIS.forecast > KPIS.budget ? 'over budget' : 'under budget'}</span>
+            <span className="text-slate-400 ml-2">{currentForecast > KPIS.budget ? 'over budget' : 'under budget'}</span>
           </div>
         </div>
 
@@ -89,15 +110,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunit
             <div>
               <p className="text-sm font-medium text-slate-500">Potential Savings</p>
               <h3 className="text-2xl font-bold text-emerald-600 mt-2">
-                ${KPIS.savingsPotential.toLocaleString()}
+                ${savingsPotential.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </h3>
             </div>
-            <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+            <div className={`p-2 rounded-lg ${activeOpportunities.length > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
               <Sparkles size={20} />
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm text-indigo-600 font-medium">
-            View {opportunities.length} opportunities <ArrowRight size={14} className="ml-1" />
+            View {activeOpportunities.length} opportunities <ArrowRight size={14} className="ml-1" />
           </div>
         </div>
 
