@@ -70,11 +70,19 @@ const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAd
 
   // Filter Data
   const filteredData = useMemo(() => {
+    // Convert active filter arrays to Sets for O(1) lookup during the filter pass
+    const filterSets = {
+      service: new Set(activeFilters.service),
+      region: new Set(activeFilters.region),
+      account: new Set(activeFilters.account),
+      tag: new Set(activeFilters.tag)
+    };
+
     return data.filter(item => {
-      if (activeFilters.service.length && !activeFilters.service.includes(item.service)) return false;
-      if (activeFilters.region.length && !activeFilters.region.includes(item.region)) return false;
-      if (activeFilters.account.length && !activeFilters.account.includes(item.account)) return false;
-      if (activeFilters.tag.length && !activeFilters.tag.includes(item.tag)) return false;
+      if (filterSets.service.size && !filterSets.service.has(item.service)) return false;
+      if (filterSets.region.size && !filterSets.region.has(item.region)) return false;
+      if (filterSets.account.size && !filterSets.account.has(item.account)) return false;
+      if (filterSets.tag.size && !filterSets.tag.has(item.tag)) return false;
       return true;
     });
   }, [activeFilters, data]);
