@@ -1,0 +1,3 @@
+## 2024-03-19 - Optimizing React Filter Lookups while Preserving State Serialization
+**Learning:** Keeping array objects in React state is necessary to preserve state serializability (especially with external libraries that might not natively support Sets). However, filtering large arrays over and over using `Array.includes()` becomes a major O(n) bottleneck during renders.
+**Action:** When filtering a large collection based on array state variables, always convert those array states into `Set` instances inside a `useMemo` immediately prior to the iteration. This maintains valid React serializable state while achieving O(1) loop lookup performance.
