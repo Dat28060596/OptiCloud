@@ -1,0 +1,3 @@
+## 2026-03-22 - CostExplorer data filtering optimization
+**Learning:** React component re-rendering performance bottlenecks often hide inside `useMemo` hooks that use O(n) lookups (`Array.includes()`) over large datasets when O(1) structures (`Set.has()`) could be used. React's state typically manages arrays for easy serialization, making it easy to accidentally use array methods inside data processing loops.
+**Action:** When working with large datasets in React, convert state arrays into `Set` or `Map` objects inside the `useMemo` immediately before iteration to optimize lookups while keeping state serializable.
