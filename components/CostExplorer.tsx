@@ -70,11 +70,20 @@ const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAd
 
   // Filter Data
   const filteredData = useMemo(() => {
+    // Optimization: Convert arrays to Sets for O(1) lookups during iteration
+    // Expected impact: Speeds up filtering of large data arrays by avoiding O(N) array.includes() calls
+    const filterSets = {
+      service: new Set(activeFilters.service),
+      region: new Set(activeFilters.region),
+      account: new Set(activeFilters.account),
+      tag: new Set(activeFilters.tag)
+    };
+
     return data.filter(item => {
-      if (activeFilters.service.length && !activeFilters.service.includes(item.service)) return false;
-      if (activeFilters.region.length && !activeFilters.region.includes(item.region)) return false;
-      if (activeFilters.account.length && !activeFilters.account.includes(item.account)) return false;
-      if (activeFilters.tag.length && !activeFilters.tag.includes(item.tag)) return false;
+      if (filterSets.service.size > 0 && !filterSets.service.has(item.service)) return false;
+      if (filterSets.region.size > 0 && !filterSets.region.has(item.region)) return false;
+      if (filterSets.account.size > 0 && !filterSets.account.has(item.account)) return false;
+      if (filterSets.tag.size > 0 && !filterSets.tag.has(item.tag)) return false;
       return true;
     });
   }, [activeFilters, data]);
