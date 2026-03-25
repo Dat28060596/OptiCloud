@@ -1,0 +1,3 @@
+## 2024-05-24 - Optimizing Array Filtering in React Components
+**Learning:** In components rendering large datasets like `CostExplorer`, using `.includes()` on multiple filter arrays within a `.filter()` loop results in an O(n * m) operation (where n is the data size and m is the number of active filters). This becomes a performance bottleneck when filtering thousands of records, blocking the main thread and causing jank during typing or filter toggling.
+**Action:** Always convert filter arrays to `Set` objects *before* iterating over the data array in a `useMemo` block. This changes the lookup to O(1) for each element, drastically reducing computation time. Ensure the sets are constructed outside the `.filter()` callback.
