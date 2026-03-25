@@ -70,11 +70,20 @@ const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAd
 
   // Filter Data
   const filteredData = useMemo(() => {
+    // ⚡ Bolt Performance Optimization:
+    // Convert filter arrays to Sets before iterating over the data array.
+    // This reduces the lookup time for active filters from O(n) to O(1) per row,
+    // which is critical for maintaining 60fps when filtering thousands of cost records.
+    const serviceSet = new Set(activeFilters.service);
+    const regionSet = new Set(activeFilters.region);
+    const accountSet = new Set(activeFilters.account);
+    const tagSet = new Set(activeFilters.tag);
+
     return data.filter(item => {
-      if (activeFilters.service.length && !activeFilters.service.includes(item.service)) return false;
-      if (activeFilters.region.length && !activeFilters.region.includes(item.region)) return false;
-      if (activeFilters.account.length && !activeFilters.account.includes(item.account)) return false;
-      if (activeFilters.tag.length && !activeFilters.tag.includes(item.tag)) return false;
+      if (serviceSet.size && !serviceSet.has(item.service)) return false;
+      if (regionSet.size && !regionSet.has(item.region)) return false;
+      if (accountSet.size && !accountSet.has(item.account)) return false;
+      if (tagSet.size && !tagSet.has(item.tag)) return false;
       return true;
     });
   }, [activeFilters, data]);
