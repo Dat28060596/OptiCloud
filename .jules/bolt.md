@@ -1,0 +1,3 @@
+## 2024-05-18 - Optimized Array Filtering via Sets in useMemo
+**Learning:** During heavy local filtering in React components (like `CostExplorer.tsx`), scanning over multiple active filter arrays with `Array.prototype.includes` across thousands of data rows causes O(N*M) lookup times which dramatically slows down rendering.
+**Action:** When filtering large datasets with dynamic multi-select arrays, wrap the active filter arrays into `Set` objects at the start of the `useMemo` block. This reduces lookup complexity to O(1) for each element without making the React state unserializable or complex.
