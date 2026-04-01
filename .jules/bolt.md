@@ -1,0 +1,3 @@
+## 2024-05-24 - Optimizing array lookups in React useMemo
+**Learning:** React state elements (like `activeFilters`) need to be serializable to safely trigger updates. By converting `activeFilters` arrays to `Set` objects inside the filtering `useMemo` immediately before iterating over large data arrays, we optimize the loop lookups from O(n) to O(1) without requiring modifications to state structure or adding unnecessary prop drill dependencies.
+**Action:** Next time I need to filter a large data set using multiple "included/excluded" property states, convert the inclusion arrays to Sets inside the specific memo hook doing the processing for an efficient lookup.
