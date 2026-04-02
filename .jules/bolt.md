@@ -1,0 +1,3 @@
+## 2025-03-04 - React State vs. Set Iteration Pattern
+**Learning:** In `CostExplorer.tsx`, React state storing array filters was causing `O(N * K)` filter iterations over a large `CostMetric` array due to `.includes()` lookups (where K is filter length). Storing Sets directly in state isn't serializable or easy to update immutably, but leaving them as arrays scales poorly on data rendering.
+**Action:** Always maintain serializable Arrays in React component state for filter configuration, but dynamically instantiate `Set` objects at the beginning of the `useMemo` calculation block right before the main data `filter/reduce` iteration to optimize lookups to `O(N)`.
