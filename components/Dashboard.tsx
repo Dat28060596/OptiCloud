@@ -9,16 +9,17 @@ import {
 } from 'lucide-react';
 import { KPIS, MOCK_COST_DATA, MOCK_ANOMALIES } from '../constants';
 import { generateExecutiveSummary } from '../services/geminiService';
-import { Anomaly, OptimizationOpportunity } from '../types';
+import { Anomaly, OptimizationOpportunity, CostMetric } from '../types';
 
 interface DashboardProps {
   onNavigate: (view: string) => void;
   anomalies: Anomaly[];
   opportunities: OptimizationOpportunity[];
   fixedOpportunityIds: Set<string>;
+  costData: CostMetric[];
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunities, fixedOpportunityIds }) => {
+const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunities, fixedOpportunityIds, costData }) => {
   const [aiSummary, setAiSummary] = useState<string>('');
   const [loadingAi, setLoadingAi] = useState<boolean>(false);
 
@@ -44,14 +45,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunit
   // Aggregating data for the chart
   const chartData = useMemo(() => {
     const dailyMap = new Map<string, number>();
-    MOCK_COST_DATA.forEach(item => {
+    costData.forEach(item => {
       const current = dailyMap.get(item.date) || 0;
       dailyMap.set(item.date, current + item.amount);
     });
     return Array.from(dailyMap.entries())
       .map(([date, amount]) => ({ date, amount }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, []);
+      // Optimization: Sorting ISO date strings ('YYYY-MM-DD') using direct string comparison
+      // instead of parsing with new Date().getTime(), avoiding expensive object creation
+      .sort((a, b) => a.date < b.date ? -1 : (a.date > b.date ? 1 : 0));
+  }, [costData]);
 
   const handleGenerateInsight = async () => {
     setLoadingAi(true);

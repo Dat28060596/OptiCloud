@@ -49,6 +49,7 @@ const App: React.FC = () => {
           anomalies={anomalies} 
           opportunities={MOCK_OPPORTUNITIES}
           fixedOpportunityIds={fixedOpportunityIds}
+          costData={costData}
         />;
       case 'explorer':
         return <CostExplorer 
@@ -75,6 +76,7 @@ const App: React.FC = () => {
           anomalies={anomalies} 
           opportunities={MOCK_OPPORTUNITIES} 
           fixedOpportunityIds={fixedOpportunityIds}
+          costData={costData}
         />;
     }
   };
