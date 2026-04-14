@@ -1,0 +1,3 @@
+## 2025-04-14 - Using String Comparison for ISO Date Sorting
+**Learning:** Parsing ISO date strings (YYYY-MM-DD) into `Date` objects in a tight loop during chart aggregations creates unnecessary object churn and is surprisingly slow in this codebase's typical large-data rendering path. Standard string comparison (`a < b`) accurately sorts these standard formats with far less memory overhead.
+**Action:** When sorting standard ISO date strings in component mapping functions, always use direct string comparison instead of `new Date(a).getTime() - new Date(b).getTime()`.
