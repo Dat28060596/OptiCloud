@@ -1,0 +1,3 @@
+## 2024-05-24 - React Component Anti-Pattern & High Iteration Overheads
+**Learning:** Extracting an inner function `FilterDropdown` out of `CostExplorer`'s main rendering scope prevents constant DOM teardowns and remounts. Furthermore, iterating over a list by combining multiple operations into a single pass substantially increases calculation speed compared to chained `.filter()`, `.forEach()`, and `Map` iterations.
+**Action:** Extract nested sub-components explicitly to the module scope wrapped in `React.memo()`. Also group list reductions when iterating over arrays instead of running separate iterations over them for filtering, mapping, and aggregating.
