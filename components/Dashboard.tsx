@@ -61,6 +61,58 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunit
     setLoadingAi(false);
   };
 
+  // Performance Optimization: Memoize the AreaChart to prevent re-renders when AI state changes
+  const memoizedAreaChart = useMemo(() => (
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart data={chartData}>
+        <defs>
+          <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
+            <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+        <XAxis
+          dataKey="date"
+          tickFormatter={(val) => val.slice(5)}
+          stroke="#94a3b8"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+        />
+        <YAxis
+          stroke="#94a3b8"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+          tickFormatter={(val) => `$${val}`}
+        />
+        <Tooltip
+          contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+          formatter={(value: number) => [`$${value}`, 'Spend']}
+        />
+        <Area type="monotone" dataKey="amount" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#colorAmount)" />
+      </AreaChart>
+    </ResponsiveContainer>
+  ), [chartData]);
+
+  // Performance Optimization: Memoize the BarChart to prevent re-renders when AI state changes
+  const memoizedBarChart = useMemo(() => (
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={[
+        { name: 'AWS', value: 24500 },
+        { name: 'Azure', value: 12000 },
+        { name: 'GCP', value: 6030 },
+      ]} layout="vertical" margin={{ left: 10, right: 30 }}>
+        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0"/>
+        <XAxis type="number" hide />
+        <YAxis dataKey="name" type="category" width={50} tick={{fill: '#64748b', fontSize: 12}} axisLine={false} tickLine={false} />
+        <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '8px' }} />
+        <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={30} />
+      </BarChart>
+    </ResponsiveContainer>
+  ), []);
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* KPI Cards */}
@@ -194,56 +246,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunit
             </select>
           </div>
           <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis 
-                  dataKey="date" 
-                  tickFormatter={(val) => val.slice(5)} 
-                  stroke="#94a3b8" 
-                  fontSize={12} 
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis 
-                  stroke="#94a3b8" 
-                  fontSize={12} 
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(val) => `$${val}`}
-                />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(value: number) => [`$${value}`, 'Spend']}
-                />
-                <Area type="monotone" dataKey="amount" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#colorAmount)" />
-              </AreaChart>
-            </ResponsiveContainer>
+            {memoizedAreaChart}
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <h3 className="font-semibold text-slate-800 mb-6">Cost by Provider</h3>
           <div className="h-[300px] w-full">
-             <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={[
-                  { name: 'AWS', value: 24500 },
-                  { name: 'Azure', value: 12000 },
-                  { name: 'GCP', value: 6030 },
-                ]} layout="vertical" margin={{ left: 10, right: 30 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0"/>
-                  <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" width={50} tick={{fill: '#64748b', fontSize: 12}} axisLine={false} tickLine={false} />
-                  <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '8px' }} />
-                  <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={30} />
-                </BarChart>
-             </ResponsiveContainer>
+             {memoizedBarChart}
           </div>
         </div>
       </div>

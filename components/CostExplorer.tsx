@@ -68,28 +68,31 @@ const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAd
 
   const hasActiveFilters = Object.values(activeFilters).some((arr: string[]) => arr.length > 0);
 
-  // Filter Data
-  const filteredData = useMemo(() => {
-    return data.filter(item => {
-      if (activeFilters.service.length && !activeFilters.service.includes(item.service)) return false;
-      if (activeFilters.region.length && !activeFilters.region.includes(item.region)) return false;
-      if (activeFilters.account.length && !activeFilters.account.includes(item.account)) return false;
-      if (activeFilters.tag.length && !activeFilters.tag.includes(item.tag)) return false;
-      return true;
-    });
-  }, [activeFilters, data]);
-
-  // Group and Aggregate Data
+  // Filter, Group, and Aggregate Data
+  // Optimized: Single pass filtering and grouping using a plain object for O(1) property access
   const groupedData = useMemo(() => {
-    const map = new Map<string, { service: string; provider: string; cost: number; key: string }>();
-    filteredData.forEach((item: CostMetric) => {
+    const grouped: Record<string, { service: string; provider: string; cost: number; key: string }> = {};
+
+    // Performance Optimization: Single for loop over data to avoid intermediate array allocations
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
+
+      // Inline filtering (skips items that don't match active filters)
+      if (activeFilters.service.length && !activeFilters.service.includes(item.service)) continue;
+      if (activeFilters.region.length && !activeFilters.region.includes(item.region)) continue;
+      if (activeFilters.account.length && !activeFilters.account.includes(item.account)) continue;
+      if (activeFilters.tag.length && !activeFilters.tag.includes(item.tag)) continue;
+
       const key = `${item.provider}-${item.service}`;
-      const existing = map.get(key) || { service: item.service, provider: item.provider, cost: 0, key };
-      existing.cost += item.amount;
-      map.set(key, existing);
-    });
-    return Array.from(map.values()).sort((a, b) => b.cost - a.cost);
-  }, [filteredData]);
+      if (!grouped[key]) {
+        grouped[key] = { service: item.service, provider: item.provider, cost: 0, key };
+      }
+      grouped[key].cost += item.amount;
+    }
+
+    // Convert to array and sort
+    return Object.values(grouped).sort((a, b) => b.cost - a.cost);
+  }, [activeFilters, data]);
 
   const totalFilteredCost = groupedData.reduce((acc, row) => acc + row.cost, 0);
 
