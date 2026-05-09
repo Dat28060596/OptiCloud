@@ -1,0 +1,3 @@
+## 2025-05-09 - CostExplorer Data Aggregation Pattern
+**Learning:** Chaining array methods (`filter`, `map`, `reduce`) combined with `Map` data structures, while readable, creates significant overhead in V8/JavaScript execution due to intermediate object allocation and multiple loop iterations. This is an anti-pattern for large datasets like cloud cost metrics where plain objects `Record<string, ...>` are faster and loops can be combined.
+**Action:** When working with large table data that requires grouping, sorting, and filtering, prefer a single O(n) pass using a standard `for` loop and a plain `Record<string, ...>` lookup table to accumulate values.
