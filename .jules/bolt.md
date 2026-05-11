@@ -1,0 +1,3 @@
+## 2023-10-25 - Object over Map for Simple Aggregation
+**Learning:** In V8, while `Map` is generally recommended, plain objects (`Record<string, number>`) combined with traditional `for` loops outperform `Map` combined with array methods (`forEach`, `Array.from`) by over 2x for simple data aggregation and string key lookups in tight loops (e.g., rendering charts). Also, sorting ISO date strings via simple lexicographical comparison is ~10x faster than parsing string to `Date` via `new Date()`.
+**Action:** Default to plain objects and simple string comparisons in data transformation functions (like `useMemo` chart mappers) to minimize GC overhead and parsing cost.
