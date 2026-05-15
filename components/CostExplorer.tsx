@@ -4,6 +4,63 @@ import { CloudProvider, CostMetric } from '../types';
 
 type FilterCategory = 'service' | 'region' | 'account' | 'tag';
 
+interface FilterDropdownProps {
+  category: FilterCategory;
+  label: string;
+  activeFilters: string[];
+  options: string[];
+  isOpen: boolean;
+  onToggleOpen: () => void;
+  onToggleFilter: (category: FilterCategory, value: string) => void;
+  onClose: () => void;
+}
+
+const FilterDropdown = React.memo(({ category, label, activeFilters, options, isOpen, onToggleOpen, onToggleFilter, onClose }: FilterDropdownProps) => {
+  const isActive = activeFilters.length > 0;
+
+  return (
+    <div className="relative">
+      <button
+        onClick={onToggleOpen}
+        className={`px-3 py-1.5 border rounded-md text-sm flex items-center transition-colors
+          ${isActive
+            ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-medium'
+            : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'}
+        `}
+      >
+        {label}
+        {isActive && (
+          <span className="ml-2 bg-indigo-200 text-indigo-800 text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            {activeFilters.length}
+          </span>
+        )}
+        <ChevronDown size={14} className={`ml-2 opacity-50 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={onClose} />
+          <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-slate-200 z-20 max-h-64 overflow-y-auto py-1 animate-in zoom-in-95 duration-100">
+            {options.map(opt => (
+              <div
+                key={opt}
+                onClick={() => onToggleFilter(category, opt)}
+                className="px-4 py-2 hover:bg-slate-50 cursor-pointer flex items-center justify-between text-sm text-slate-700"
+              >
+                <span className="truncate mr-2">{opt}</span>
+                {activeFilters.includes(opt) && <Check size={14} className="text-indigo-600 flex-shrink-0" />}
+              </div>
+            ))}
+            {options.length === 0 && (
+              <div className="px-4 py-2 text-sm text-slate-400">No options found</div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+});
+
 interface CostExplorerProps {
   data: CostMetric[];
   onDeleteService: (key: string) => void;
@@ -68,28 +125,30 @@ const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAd
 
   const hasActiveFilters = Object.values(activeFilters).some((arr: string[]) => arr.length > 0);
 
-  // Filter Data
-  const filteredData = useMemo(() => {
-    return data.filter(item => {
-      if (activeFilters.service.length && !activeFilters.service.includes(item.service)) return false;
-      if (activeFilters.region.length && !activeFilters.region.includes(item.region)) return false;
-      if (activeFilters.account.length && !activeFilters.account.includes(item.account)) return false;
-      if (activeFilters.tag.length && !activeFilters.tag.includes(item.tag)) return false;
-      return true;
-    });
-  }, [activeFilters, data]);
-
-  // Group and Aggregate Data
+  // Filter, Group and Aggregate Data using plain object for O(1) lookup
   const groupedData = useMemo(() => {
-    const map = new Map<string, { service: string; provider: string; cost: number; key: string }>();
-    filteredData.forEach((item: CostMetric) => {
+    const record: Record<string, { service: string; provider: string; cost: number; key: string }> = {};
+
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
+
+      if (activeFilters.service.length && !activeFilters.service.includes(item.service)) continue;
+      if (activeFilters.region.length && !activeFilters.region.includes(item.region)) continue;
+      if (activeFilters.account.length && !activeFilters.account.includes(item.account)) continue;
+      if (activeFilters.tag.length && !activeFilters.tag.includes(item.tag)) continue;
+
       const key = `${item.provider}-${item.service}`;
-      const existing = map.get(key) || { service: item.service, provider: item.provider, cost: 0, key };
-      existing.cost += item.amount;
-      map.set(key, existing);
-    });
-    return Array.from(map.values()).sort((a, b) => b.cost - a.cost);
-  }, [filteredData]);
+      if (record[key]) {
+        record[key].cost += item.amount;
+      } else {
+        record[key] = { service: item.service, provider: item.provider, cost: item.amount, key };
+      }
+    }
+
+    const result = Object.values(record);
+    result.sort((a, b) => b.cost - a.cost);
+    return result;
+  }, [activeFilters, data]);
 
   const totalFilteredCost = groupedData.reduce((acc, row) => acc + row.cost, 0);
 
@@ -111,53 +170,6 @@ const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAd
     setNewService({ service: '', provider: CloudProvider.AWS, cost: '', region: 'us-east-1' });
   };
 
-  // Helper component for dropdown
-  const FilterDropdown = ({ category, label }: { category: FilterCategory, label: string }) => {
-    const isActive = activeFilters[category].length > 0;
-    const isOpen = openDropdown === category;
-
-    return (
-      <div className="relative">
-        <button 
-          onClick={() => setOpenDropdown(isOpen ? null : category)}
-          className={`px-3 py-1.5 border rounded-md text-sm flex items-center transition-colors
-            ${isActive 
-              ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-medium' 
-              : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'}
-          `}
-        >
-          {label}
-          {isActive && (
-            <span className="ml-2 bg-indigo-200 text-indigo-800 text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {activeFilters[category].length}
-            </span>
-          )}
-          <ChevronDown size={14} className={`ml-2 opacity-50 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
-
-        {isOpen && (
-          <>
-            <div className="fixed inset-0 z-10" onClick={() => setOpenDropdown(null)} />
-            <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-slate-200 z-20 max-h-64 overflow-y-auto py-1 animate-in zoom-in-95 duration-100">
-              {options[category].map(opt => (
-                <div 
-                  key={opt} 
-                  onClick={() => handleFilterToggle(category, opt)}
-                  className="px-4 py-2 hover:bg-slate-50 cursor-pointer flex items-center justify-between text-sm text-slate-700"
-                >
-                  <span className="truncate mr-2">{opt}</span>
-                  {activeFilters[category].includes(opt) && <Check size={14} className="text-indigo-600 flex-shrink-0" />}
-                </div>
-              ))}
-              {options[category].length === 0 && (
-                <div className="px-4 py-2 text-sm text-slate-400">No options found</div>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
@@ -189,10 +201,46 @@ const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAd
           <span className="ml-2 font-medium text-sm">Filters:</span>
         </div>
         
-        <FilterDropdown category="service" label="Service" />
-        <FilterDropdown category="region" label="Region" />
-        <FilterDropdown category="account" label="Account" />
-        <FilterDropdown category="tag" label="Tag" />
+        <FilterDropdown
+          category="service"
+          label="Service"
+          activeFilters={activeFilters.service}
+          options={options.service}
+          isOpen={openDropdown === 'service'}
+          onToggleOpen={() => setOpenDropdown(openDropdown === 'service' ? null : 'service')}
+          onToggleFilter={handleFilterToggle}
+          onClose={() => setOpenDropdown(null)}
+        />
+        <FilterDropdown
+          category="region"
+          label="Region"
+          activeFilters={activeFilters.region}
+          options={options.region}
+          isOpen={openDropdown === 'region'}
+          onToggleOpen={() => setOpenDropdown(openDropdown === 'region' ? null : 'region')}
+          onToggleFilter={handleFilterToggle}
+          onClose={() => setOpenDropdown(null)}
+        />
+        <FilterDropdown
+          category="account"
+          label="Account"
+          activeFilters={activeFilters.account}
+          options={options.account}
+          isOpen={openDropdown === 'account'}
+          onToggleOpen={() => setOpenDropdown(openDropdown === 'account' ? null : 'account')}
+          onToggleFilter={handleFilterToggle}
+          onClose={() => setOpenDropdown(null)}
+        />
+        <FilterDropdown
+          category="tag"
+          label="Tag"
+          activeFilters={activeFilters.tag}
+          options={options.tag}
+          isOpen={openDropdown === 'tag'}
+          onToggleOpen={() => setOpenDropdown(openDropdown === 'tag' ? null : 'tag')}
+          onToggleFilter={handleFilterToggle}
+          onClose={() => setOpenDropdown(null)}
+        />
         
         {hasActiveFilters && (
           <button 
