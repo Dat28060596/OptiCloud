@@ -1,0 +1,3 @@
+## 2024-05-20 - CostExplorer Optimization
+**Learning:** React's array manipulation chaining (like `.filter().map()` or using `Map`) incurs significant hidden overhead in large datasets due to allocating intermediate arrays and iterators.
+**Action:** When filtering and grouping large datasets in UI components (like `CostExplorer`), use a single `for` loop pass mapping to a plain object (`Record<string, ...>`). This avoids the cost of intermediate arrays and reduces lookup overhead compared to `Map`.
