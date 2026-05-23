@@ -1,0 +1,3 @@
+## 2024-05-18 - ISO Date String Sorting
+**Learning:** Parsing ISO date strings to numbers via `new Date(dateStr).getTime()` just for sorting is extremely slow and causes unnecessary object creation. For ISO format strings ('YYYY-MM-DD'), simple string comparison operators (`<` and `>`) are significantly faster because lexicographical sorting of ISO dates works identically to chronological sorting, and V8 handles string comparison extremely efficiently.
+**Action:** Replace `sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())` with `sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0)` when sorting ISO 8601 formatted date strings.
