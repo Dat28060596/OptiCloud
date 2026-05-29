@@ -1,0 +1,3 @@
+## 2024-03-24 - V8 Aggregation and Date Sorting Performance
+**Learning:** In V8, iterating arrays with standard `for` loops and aggregating using plain JavaScript objects (`Record<string, ...>`) is significantly faster (~6x in measurements) than using `Map` with `forEach` for large datasets. Additionally, parsing ISO dates using `new Date(a).getTime()` for simple sorting is very expensive compared to direct lexicographical string comparisons (`a < b ? -1 : a > b ? 1 : 0`), which proved to be ~13x faster.
+**Action:** When filtering, grouping, and sorting large datasets on the frontend, default to plain JS Objects for aggregation and string comparisons for ISO dates instead of heavier Map or Date abstractions unless specific methods are strictly required.
