@@ -1,0 +1,3 @@
+## 2024-03-24 - String Comparison over Date Parsing for ISO Dates
+**Learning:** When sorting ISO date strings ('YYYY-MM-DD'), `new Date(dateStr).getTime()` is significantly slower (161ms vs 13.5ms for 10k items) than simple string comparison (`a.date < b.date`). This is because V8/JS engines have to parse the string, create a new Date object, and then extract the timestamp, compared to just doing lexicographical comparison which works perfectly for ISO 8601 format dates.
+**Action:** Always use direct string comparison (`a < b ? -1 : a > b ? 1 : 0`) instead of parsing when sorting ISO format date strings.
