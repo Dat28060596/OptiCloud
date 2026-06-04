@@ -43,14 +43,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunit
 
   // Aggregating data for the chart
   const chartData = useMemo(() => {
-    const dailyMap = new Map<string, number>();
-    MOCK_COST_DATA.forEach(item => {
-      const current = dailyMap.get(item.date) || 0;
-      dailyMap.set(item.date, current + item.amount);
-    });
-    return Array.from(dailyMap.entries())
-      .map(([date, amount]) => ({ date, amount }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Optimization: Replaced Map and forEach with a plain object and a single for loop.
+    // Also replaced expensive Date parsing during sort with direct string comparison since dates are YYYY-MM-DD strings.
+    const dailyMap: Record<string, number> = {};
+    for (let i = 0; i < MOCK_COST_DATA.length; i++) {
+      const item = MOCK_COST_DATA[i];
+      dailyMap[item.date] = (dailyMap[item.date] || 0) + item.amount;
+    }
+
+    return Object.keys(dailyMap)
+      .map(date => ({ date, amount: dailyMap[date] }))
+      .sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
   }, []);
 
   const handleGenerateInsight = async () => {
