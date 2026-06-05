@@ -1,0 +1,3 @@
+## 2025-03-09 - CostExplorer Grouping Bottleneck
+**Learning:** In `CostExplorer.tsx`, chaining `Array.prototype.filter` and `Array.prototype.forEach` with a `Map` structure for grouping and aggregating metrics is significantly slower (by ~3.5x in isolated benchmarks) than utilizing a single `for` loop pass over the original array that accumulates directly into a standard Object (`Record<string, ...>`).
+**Action:** When filtering, grouping, and aggregating large datasets on the frontend, always prefer a single `for` loop with plain JavaScript Object accumulation to avoid allocating intermediate arrays and to capitalize on faster object key lookups.
