@@ -1,0 +1,5 @@
+## 2024-03-05 - Dashboard Chart Re-rendering & ISO Date Sorting
+
+**Learning:** Recharts components like `AreaChart` and `BarChart` are computationally expensive to re-render. When placed inside a component with independent state updates (like `loadingAi` or `aiSummary` in `Dashboard.tsx`), they trigger full DOM tear-downs and recreations on every state change, causing noticeable UI stutter. Furthermore, when aggregating and sorting large datasets by date on the frontend, parsing dates using `new Date().getTime()` is significantly slower than direct ISO string comparison (`a < b ? -1 : a > b ? 1 : 0`), and accumulating data using a plain JS `Record` object inside a standard `for` loop is considerably faster (~1.5x) than using `Map` and `forEach`.
+
+**Action:** Wrap expensive external chart components in `useMemo` blocks tied to their specific data dependencies (`[chartData]`) to prevent unnecessary re-rendering. When performing aggregations over large datasets, prefer plain JS objects (`Record`) with standard `for` loops over `Map` structures, and use direct string comparison for YYYY-MM-DD formatted dates instead of Date parsing.
