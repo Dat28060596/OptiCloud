@@ -68,28 +68,26 @@ const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAd
 
   const hasActiveFilters = Object.values(activeFilters).some((arr: string[]) => arr.length > 0);
 
-  // Filter Data
-  const filteredData = useMemo(() => {
-    return data.filter(item => {
-      if (activeFilters.service.length && !activeFilters.service.includes(item.service)) return false;
-      if (activeFilters.region.length && !activeFilters.region.includes(item.region)) return false;
-      if (activeFilters.account.length && !activeFilters.account.includes(item.account)) return false;
-      if (activeFilters.tag.length && !activeFilters.tag.includes(item.tag)) return false;
-      return true;
-    });
-  }, [activeFilters, data]);
-
-  // Group and Aggregate Data
+  // Filter, Group and Aggregate Data (Bolt optimization: single pass loop)
   const groupedData = useMemo(() => {
-    const map = new Map<string, { service: string; provider: string; cost: number; key: string }>();
-    filteredData.forEach((item: CostMetric) => {
+    const groupedObj: Record<string, { service: string; provider: string; cost: number; key: string }> = {};
+
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
+      if (activeFilters.service.length && !activeFilters.service.includes(item.service)) continue;
+      if (activeFilters.region.length && !activeFilters.region.includes(item.region)) continue;
+      if (activeFilters.account.length && !activeFilters.account.includes(item.account)) continue;
+      if (activeFilters.tag.length && !activeFilters.tag.includes(item.tag)) continue;
+
       const key = `${item.provider}-${item.service}`;
-      const existing = map.get(key) || { service: item.service, provider: item.provider, cost: 0, key };
-      existing.cost += item.amount;
-      map.set(key, existing);
-    });
-    return Array.from(map.values()).sort((a, b) => b.cost - a.cost);
-  }, [filteredData]);
+      if (!groupedObj[key]) {
+        groupedObj[key] = { service: item.service, provider: item.provider, cost: 0, key };
+      }
+      groupedObj[key].cost += item.amount;
+    }
+
+    return Object.values(groupedObj).sort((a, b) => b.cost - a.cost);
+  }, [activeFilters, data]);
 
   const totalFilteredCost = groupedData.reduce((acc, row) => acc + row.cost, 0);
 
