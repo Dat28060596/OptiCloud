@@ -1,0 +1,3 @@
+## 2025-02-20 - Fast Grouping and Aggregation
+**Learning:** In React components with frequent state changes (like filter arrays changing), chaining array methods (e.g. `filter().forEach()`) and using `Map` object for aggregation can cause significant performance overhead. Combining these into a single iteration `for` loop and using plain JavaScript Object (`Record<string, ...>`) for grouping is noticeably faster.
+**Action:** When filtering, grouping, and aggregating large datasets on the frontend, prefer a single `for` loop with plain JavaScript Object accumulation over chaining multiple array methods or using `Map` structures to significantly improve performance by reducing iterations and memory overhead.
