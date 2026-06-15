@@ -50,7 +50,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunit
     });
     return Array.from(dailyMap.entries())
       .map(([date, amount]) => ({ date, amount }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      // ⚡ Bolt Optimization: Use direct string comparison for dates instead of new Date().getTime()
+      // This avoids creating expensive intermediate Date objects during sorting.
+      .sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
   }, []);
 
   const handleGenerateInsight = async () => {
