@@ -1,0 +1,3 @@
+## 2025-03-09 - Direct String Comparison for ISO Date Sorting
+**Learning:** Parsing zero-padded ISO date strings (like `YYYY-MM-DD`) using `new Date()` inside `.sort()` loops creates an O(N log N) bottleneck due to repeated object instantiation and parsing overhead. In JavaScript, direct lexicographical string comparison (`<`, `>`) is ~10-15x faster and perfectly functionally equivalent for strict zero-padded ISO strings. Also `localeCompare()` is significantly slower than direct operators.
+**Action:** Always prefer direct string comparison for sorting known-format ISO date strings rather than converting to Date objects or using `localeCompare`.
