@@ -1,0 +1,3 @@
+## 2024-05-24 - [Date parsing performance bottleneck]
+**Learning:** Parsing ISO-like date strings (`YYYY-MM-DD`) into `Date` objects inside array sorting loops (e.g., `.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())`) causes a massive performance hit due to excessive object allocation and parsing overhead in JavaScript. Simple string comparison is functionally equivalent for ISO formats but approximately 10x faster.
+**Action:** When sorting arrays of structured date strings on the frontend, always use direct string comparison operators (`<`, `>`) instead of converting them into Date objects.
