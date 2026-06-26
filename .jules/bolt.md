@@ -1,0 +1,3 @@
+## 2025-02-27 - [CostExplorer Optimization: Combine Filter & Grouping]
+**Learning:** Combining multiple array iterations (like `filter` then `forEach` or `map`) into a single `for` loop significantly improves performance, especially when dealing with potentially large datasets on the frontend. Additionally, using plain JavaScript objects (`Record<string, ...>`) for accumulation often has less overhead than using `Map` objects, particularly in fast-path UI rendering calculations inside `useMemo`.
+**Action:** When working on data tables or charts that filter and aggregate data, I will proactively look for opportunities to combine array iteration passes into single `for` or `reduce` loops using plain JS objects to avoid creating intermediate array allocations.
