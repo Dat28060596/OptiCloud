@@ -1,0 +1,3 @@
+## 2024-06-27 - [Map vs Record for Frontend Aggregation]
+**Learning:** [In a React `useMemo` hook doing data aggregation over thousands of rows, using a `Map` and `Array.prototype.forEach` was notably slower (2.5x in local benchmarks) due to the overhead of the `.forEach` callback closure instantiation and `Map.get()` / `Map.set()` function calls compared to a simple JS `Record` and standard `for` loop.]
+**Action:** [When implementing grouping/aggregation algorithms in hot loops on the frontend, default to using plain JavaScript Objects (`Record<string, ...>`) and classic `for` loops to minimize intermediate object creation and execution time.]
