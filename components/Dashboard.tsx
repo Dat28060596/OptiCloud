@@ -50,7 +50,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, anomalies, opportunit
     });
     return Array.from(dailyMap.entries())
       .map(([date, amount]) => ({ date, amount }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      // Optimization: Direct string comparison of ISO dates is significantly faster than object creation
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
   }, []);
 
   const handleGenerateInsight = async () => {
