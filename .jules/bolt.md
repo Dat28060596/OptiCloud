@@ -1,0 +1,3 @@
+## 2025-03-09 - [Combined Filter & Aggregate in Frontend]
+**Learning:** Combining array filter and aggregate operations (e.g. `Array.prototype.filter` followed by `Array.prototype.forEach` setting into a Map) into a single pass using a standard `for` loop with a plain JavaScript Object (`Record<string, number>`) significantly improves performance by reducing memory allocation overhead (preventing creation of intermediate arrays) and dropping iterations from O(2N) to O(N).
+**Action:** Always check chained array operations dealing with large datasets on the frontend to combine them into single-pass loops where possible.
