@@ -1,0 +1,3 @@
+## 2024-05-18 - Optimized Array Processing
+**Learning:** Chaining multiple native array methods like `.filter()`, `.forEach()`, and creating intermediate collections (like `Map`) can introduce significant overhead in JS/V8 due to repeated iterations and memory allocations when filtering and aggregating large datasets on the frontend.
+**Action:** When filtering, grouping, and aggregating large datasets in React components (e.g., `CostExplorer`), use a single `for` loop combined with a plain JavaScript Object (`Record<string, ...>`) accumulator to process data in a single pass. This substantially decreases execution time and memory footprint on cold paths or re-renders.
