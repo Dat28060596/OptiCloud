@@ -1,0 +1,3 @@
+## 2024-05-18 - Prevent unnecessary component re-renders inside render functions
+**Learning:** Defining sub-components inline within a parent component's render function (like `FilterDropdown` inside `CostExplorer`) is a performance anti-pattern. It causes the sub-component's function definition to be recreated on every parent render, defeating React's reconciliation process and leading to unnecessary teardown and recreation of DOM nodes.
+**Action:** Extract internal sub-components to the module scope and wrap them with `React.memo()`. When doing so, ensure that any functions passed down as props (such as event handlers) are wrapped in `useCallback` to maintain stable references, otherwise `React.memo` will fail to prevent re-renders.
