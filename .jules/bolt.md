@@ -1,0 +1,3 @@
+## 2025-02-28 - Optimizing Large Data Processing Pipelines in React
+**Learning:** Chaining array methods (`.filter()`, `.forEach()`) in large data sets combined with standard JavaScript `Map`s for data accumulation creates massive unneeded garbage collection pressure and slow iterations. Using a plain JavaScript object as an accumulator (`Record<string, ...>`) along with a single `for` loop dramatically decreases the runtime overhead for processing grouped metrics on the frontend.
+**Action:** When filtering, grouping, and aggregating datasets for tables or charts, prefer using a single `for` loop and a plain object dictionary instead of chaining multiple array prototype methods and `Map` structs to ensure maximum iteration speed and minimal memory allocations.
