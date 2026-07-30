@@ -1,0 +1,3 @@
+## 2023-10-27 - Optimize Data Filtering and Grouping with Plain Object Accumulator
+**Learning:** Chaining array methods like `.filter()` and `.forEach()` with `Map` data structures on large datasets can introduce unnecessary memory overhead and double iterations. In this frontend environment processing mock cost data, using a single iteration with a plain JavaScript object (`Record<string, ...>`) as an accumulator was significantly faster than using an ES6 Map.
+**Action:** Always consider combining filtering, grouping, and aggregation operations into a single `for` loop with a plain object accumulator when working with large data sets on the frontend to improve performance by reducing iterations and memory footprint.
