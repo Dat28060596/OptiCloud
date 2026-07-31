@@ -1,0 +1,3 @@
+## 2024-08-01 - Single-pass filtering and grouping optimization
+**Learning:** Combining filtering (`filter`), iterating (`forEach`), and grouping operations into a single-pass `for` loop with plain JavaScript object accumulators and `Set` lookups significantly reduces performance overhead for processing large datasets in the frontend compared to using standard array methods (`Array.prototype.filter`, `includes`, and `Map`).
+**Action:** When filtering, grouping, and aggregating large datasets on the frontend, prefer a single `for` loop with a plain JavaScript Object accumulation over chaining multiple array methods or using `Map` structures to significantly improve performance.
