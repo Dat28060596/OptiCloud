@@ -68,30 +68,32 @@ const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAd
 
   const hasActiveFilters = Object.values(activeFilters).some((arr: string[]) => arr.length > 0);
 
-  // Filter Data
-  const filteredData = useMemo(() => {
-    return data.filter(item => {
-      if (activeFilters.service.length && !activeFilters.service.includes(item.service)) return false;
-      if (activeFilters.region.length && !activeFilters.region.includes(item.region)) return false;
-      if (activeFilters.account.length && !activeFilters.account.includes(item.account)) return false;
-      if (activeFilters.tag.length && !activeFilters.tag.includes(item.tag)) return false;
-      return true;
-    });
-  }, [activeFilters, data]);
+  // Filter, Group, and Aggregate Data in a single pass
+  const { groupedData, totalFilteredCost } = useMemo(() => {
+    let total = 0;
+    const groups: Record<string, { service: string; provider: string; cost: number; key: string }> = {};
 
-  // Group and Aggregate Data
-  const groupedData = useMemo(() => {
-    const map = new Map<string, { service: string; provider: string; cost: number; key: string }>();
-    filteredData.forEach((item: CostMetric) => {
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
+
+      // Filter
+      if (activeFilters.service.length && !activeFilters.service.includes(item.service)) continue;
+      if (activeFilters.region.length && !activeFilters.region.includes(item.region)) continue;
+      if (activeFilters.account.length && !activeFilters.account.includes(item.account)) continue;
+      if (activeFilters.tag.length && !activeFilters.tag.includes(item.tag)) continue;
+
+      // Group and Aggregate
       const key = `${item.provider}-${item.service}`;
-      const existing = map.get(key) || { service: item.service, provider: item.provider, cost: 0, key };
-      existing.cost += item.amount;
-      map.set(key, existing);
-    });
-    return Array.from(map.values()).sort((a, b) => b.cost - a.cost);
-  }, [filteredData]);
+      if (!groups[key]) {
+        groups[key] = { service: item.service, provider: item.provider, cost: 0, key };
+      }
+      groups[key].cost += item.amount;
+      total += item.amount;
+    }
 
-  const totalFilteredCost = groupedData.reduce((acc, row) => acc + row.cost, 0);
+    const sortedGroups = Object.values(groups).sort((a, b) => b.cost - a.cost);
+    return { groupedData: sortedGroups, totalFilteredCost: total };
+  }, [activeFilters, data]);
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
