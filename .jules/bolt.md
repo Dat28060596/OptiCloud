@@ -1,0 +1,3 @@
+## 2024-08-04 - [Single Pass Array Manipulation for Performance]
+**Learning:** Chaining array methods like `filter()` followed by `forEach()` and leveraging a `Map` creates multiple iterations over large datasets and adds memory overhead. Consolidating this into a single `for` loop utilizing a plain JavaScript object (`Record<string, ...>`) accumulator significantly speeds up filtering and grouping.
+**Action:** When filtering, grouping, and aggregating large datasets on the frontend, prefer a single `for` loop with plain JavaScript Object (`Record<string, ...>`) accumulation over chaining multiple array methods (`filter`, `forEach`) or using `Map` structures to improve performance.
