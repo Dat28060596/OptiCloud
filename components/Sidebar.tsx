@@ -80,4 +80,5 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView }) => {
   );
 };
 
-export default Sidebar;
+// ⚡ Bolt: Added React.memo to prevent unnecessary Sidebar re-renders when parent App state (like anomalies or cost data) changes.
+export default React.memo(Sidebar);
