@@ -1,0 +1,3 @@
+## 2023-10-27 - [React Render Optimization]
+**Learning:** Extracting inline components (e.g., `FilterDropdown` inside `CostExplorer`) into globally scoped memoized components is a critical performance win. Inline components get a new function reference on every re-render of the parent, which not only defeats `React.memo` but also forces a full unmount and remount of the component, losing DOM state (like input focus or dropdown state) and wasting CPU cycles.
+**Action:** Always extract helper components outside the parent component and wrap them with `React.memo` (using `useCallback` for their props) to ensure stable identity and prevent unnecessary re-renders or re-mounts.
