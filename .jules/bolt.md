@@ -1,0 +1,3 @@
+## 2025-03-05 - Extracted inline FilterDropdown component in CostExplorer
+**Learning:** Defining inline React components (like `FilterDropdown` inside `CostExplorer`) causes the component to be redefined on every single render of the parent. This forces React to unmount the previous instance and completely remount a new one, destroying any local DOM state (like focus or scroll position) and bypassing all reconciliation optimizations.
+**Action:** Always extract inner components to the top level (outside the parent component) and pass down the necessary state and callbacks as props. If you want to optimize further, wrap the extracted component in `React.memo()` and stable its callback props with `useCallback()`.
