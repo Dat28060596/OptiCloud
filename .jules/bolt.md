@@ -1,0 +1,3 @@
+## 2025-03-09 - Avoid instantiating Date objects in sort comparators for ISO 8601 strings
+**Learning:** Instantiating `Date` objects inside a `.sort()` comparator when sorting arrays of objects by an ISO 8601 formatted date string (e.g., 'YYYY-MM-DD') adds significant garbage collection overhead and execution time in hot paths. Lexical string comparison is much faster and maintains correctness for ISO 8601 dates.
+**Action:** Use `a.date < b.date ? -1 : (a.date > b.date ? 1 : 0)` instead of `new Date(a.date).getTime() - new Date(b.date).getTime()` for string dates to improve performance without introducing sort instability.
