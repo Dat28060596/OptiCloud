@@ -1,0 +1,3 @@
+## 2025-02-28 - Optimize Array Sorting for ISO 8601 Dates
+**Learning:** Instantiating `Date` objects inside the `Array.prototype.sort` comparator loop (e.g. `.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime())`) for ISO 8601 formatted strings creates significant garbage collection overhead and degrades performance on large datasets. Because ISO 8601 strings (like 'YYYY-MM-DD') are lexicographically sortable, simple string comparison is computationally much cheaper.
+**Action:** Always prefer lexical string comparison `a < b ? -1 : (a > b ? 1 : 0)` when sorting stringified dates in strict formats, avoiding the cost of object instantiation.
