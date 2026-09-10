@@ -1,0 +1,3 @@
+## 2024-03-20 - Inline React Components Destroy Performance
+**Learning:** Defining helper components inline inside a parent component's render function (like `FilterDropdown` inside `CostExplorer`) is a serious anti-pattern. It causes the inner component to unmount and completely remount on every parent render, leading to DOM tearing, loss of local state/focus, and terrible performance for complex UIs.
+**Action:** Always extract inner components to the top level outside the parent. Pass needed data via props and wrap with `React.memo()` (and memoize callback handlers using `useCallback`) if they rely on stable references.
