@@ -1,0 +1,3 @@
+## 2024-05-18 - Optimize date sorting for ISO 8601 strings
+**Learning:** Instantiating new Date objects inside sort comparators (e.g., `new Date(a.date).getTime() - new Date(b.date).getTime()`) adds significant garbage collection overhead and slows down hot paths, especially for arrays. Lexical string comparison is sufficient and much faster for ISO 8601 date strings (YYYY-MM-DD).
+**Action:** Always prefer lexical string comparison for sorting ISO 8601 date strings to maintain the strict weak ordering contract and correctly handle duplicate values. Use `a.date < b.date ? -1 : (a.date > b.date ? 1 : 0)`.
