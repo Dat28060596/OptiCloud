@@ -1,0 +1,3 @@
+## 2024-05-18 - Avoid Date Object Instantiation in Sort Comparators
+**Learning:** When sorting an array by ISO 8601 formatted date strings (like YYYY-MM-DD), creating new `Date` objects in the `.sort()` comparator creates massive garbage collection overhead and degrades performance, as it parses and instantiates thousands of objects during the sort process.
+**Action:** Rely on lexical string comparison for ISO 8601 strings since their alphabetical order exactly matches their chronological order. Use a strictly compliant comparator (e.g., `a.date < b.date ? -1 : (a.date > b.date ? 1 : 0)`) to avoid `Date` instantiation overhead while ensuring sort stability.
