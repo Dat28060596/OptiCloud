@@ -10,6 +10,72 @@ interface CostExplorerProps {
   onAddService: (metric: CostMetric) => void;
 }
 
+
+interface FilterDropdownProps {
+  category: FilterCategory;
+  label: string;
+  activeOptions: string[];
+  isOpen: boolean;
+  options: string[];
+  onToggleDropdown: (category: FilterCategory | null) => void;
+  onFilterToggle: (category: FilterCategory, value: string) => void;
+}
+
+const FilterDropdown = React.memo(({
+  category,
+  label,
+  activeOptions,
+  isOpen,
+  options,
+  onToggleDropdown,
+  onFilterToggle
+}: FilterDropdownProps) => {
+  const isActive = activeOptions.length > 0;
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => onToggleDropdown(isOpen ? null : category)}
+        className={`px-3 py-1.5 border rounded-md text-sm flex items-center transition-colors
+          ${isActive
+            ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-medium'
+            : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'}
+        `}
+      >
+        {label}
+        {isActive && (
+          <span className="ml-2 bg-indigo-200 text-indigo-800 text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            {activeOptions.length}
+          </span>
+        )}
+        <ChevronDown size={14} className={`ml-2 opacity-50 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => onToggleDropdown(null)} />
+          <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-slate-200 z-20 max-h-64 overflow-y-auto py-1 animate-in zoom-in-95 duration-100">
+            {options.map(opt => (
+              <div
+                key={opt}
+                onClick={() => onFilterToggle(category, opt)}
+                className="px-4 py-2 hover:bg-slate-50 cursor-pointer flex items-center justify-between text-sm text-slate-700"
+              >
+                <span className="truncate mr-2">{opt}</span>
+                {activeOptions.includes(opt) && <Check size={14} className="text-indigo-600 flex-shrink-0" />}
+              </div>
+            ))}
+            {options.length === 0 && (
+              <div className="px-4 py-2 text-sm text-slate-400">No options found</div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+});
+
+
 const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAddService }) => {
   const [activeFilters, setActiveFilters] = useState<Record<FilterCategory, string[]>>({
     service: [],
@@ -51,7 +117,7 @@ const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAd
     };
   }, [data]);
 
-  const handleFilterToggle = (category: FilterCategory, value: string) => {
+  const handleFilterToggle = React.useCallback((category: FilterCategory, value: string) => {
     setActiveFilters(prev => {
       const current = prev[category];
       const next = current.includes(value) 
@@ -59,7 +125,7 @@ const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAd
         : [...current, value];
       return { ...prev, [category]: next };
     });
-  };
+  }, []);
 
   const clearFilters = () => {
     setActiveFilters({ service: [], region: [], account: [], tag: [] });
@@ -111,54 +177,6 @@ const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAd
     setNewService({ service: '', provider: CloudProvider.AWS, cost: '', region: 'us-east-1' });
   };
 
-  // Helper component for dropdown
-  const FilterDropdown = ({ category, label }: { category: FilterCategory, label: string }) => {
-    const isActive = activeFilters[category].length > 0;
-    const isOpen = openDropdown === category;
-
-    return (
-      <div className="relative">
-        <button 
-          onClick={() => setOpenDropdown(isOpen ? null : category)}
-          className={`px-3 py-1.5 border rounded-md text-sm flex items-center transition-colors
-            ${isActive 
-              ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-medium' 
-              : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'}
-          `}
-        >
-          {label}
-          {isActive && (
-            <span className="ml-2 bg-indigo-200 text-indigo-800 text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {activeFilters[category].length}
-            </span>
-          )}
-          <ChevronDown size={14} className={`ml-2 opacity-50 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
-
-        {isOpen && (
-          <>
-            <div className="fixed inset-0 z-10" onClick={() => setOpenDropdown(null)} />
-            <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-slate-200 z-20 max-h-64 overflow-y-auto py-1 animate-in zoom-in-95 duration-100">
-              {options[category].map(opt => (
-                <div 
-                  key={opt} 
-                  onClick={() => handleFilterToggle(category, opt)}
-                  className="px-4 py-2 hover:bg-slate-50 cursor-pointer flex items-center justify-between text-sm text-slate-700"
-                >
-                  <span className="truncate mr-2">{opt}</span>
-                  {activeFilters[category].includes(opt) && <Check size={14} className="text-indigo-600 flex-shrink-0" />}
-                </div>
-              ))}
-              {options[category].length === 0 && (
-                <div className="px-4 py-2 text-sm text-slate-400">No options found</div>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -189,10 +207,42 @@ const CostExplorer: React.FC<CostExplorerProps> = ({ data, onDeleteService, onAd
           <span className="ml-2 font-medium text-sm">Filters:</span>
         </div>
         
-        <FilterDropdown category="service" label="Service" />
-        <FilterDropdown category="region" label="Region" />
-        <FilterDropdown category="account" label="Account" />
-        <FilterDropdown category="tag" label="Tag" />
+        <FilterDropdown
+          category="service"
+          label="Service"
+          activeOptions={activeFilters.service}
+          isOpen={openDropdown === 'service'}
+          options={options.service}
+          onToggleDropdown={setOpenDropdown}
+          onFilterToggle={handleFilterToggle}
+        />
+        <FilterDropdown
+          category="region"
+          label="Region"
+          activeOptions={activeFilters.region}
+          isOpen={openDropdown === 'region'}
+          options={options.region}
+          onToggleDropdown={setOpenDropdown}
+          onFilterToggle={handleFilterToggle}
+        />
+        <FilterDropdown
+          category="account"
+          label="Account"
+          activeOptions={activeFilters.account}
+          isOpen={openDropdown === 'account'}
+          options={options.account}
+          onToggleDropdown={setOpenDropdown}
+          onFilterToggle={handleFilterToggle}
+        />
+        <FilterDropdown
+          category="tag"
+          label="Tag"
+          activeOptions={activeFilters.tag}
+          isOpen={openDropdown === 'tag'}
+          options={options.tag}
+          onToggleDropdown={setOpenDropdown}
+          onFilterToggle={handleFilterToggle}
+        />
         
         {hasActiveFilters && (
           <button 
