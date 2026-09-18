@@ -1,0 +1,3 @@
+## 2025-03-05 - Inline Component Extraction and Memoization
+**Learning:** Defining inline React components within a parent component's render method causes the inner component to unmount and remount completely on every single parent render. This severely degrades performance and destroys local DOM state. Using `React.memo` on the extracted component requires wrapping passed event handler props in `useCallback` to maintain stable references.
+**Action:** Always extract inner components to the top level outside the parent. When passing functions as props from the parent to a memoized sub-component, wrap them in `useCallback`.
