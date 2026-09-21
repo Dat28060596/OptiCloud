@@ -1,0 +1,3 @@
+## 2024-05-15 - Extracted inline React component
+**Learning:** Defining components like `FilterDropdown` inside a parent component (`CostExplorer`) causes the inner component to unmount and remount on every parent render. This destroys local DOM state and severely degrades performance, particularly during typing or frequent filter toggles.
+**Action:** Always extract inline sub-components to the top level (outside the parent function) and use `React.memo` for them. Pass down state/callbacks as props, ensuring functions passed as props (like `handleFilterToggle`) are wrapped in `useCallback` to maintain stable references.
