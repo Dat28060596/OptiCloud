@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
-import Dashboard from './components/Dashboard';
-import CostExplorer from './components/CostExplorer';
-import OptimizationHub from './components/OptimizationHub';
-import Anomalies from './components/Anomalies';
-import Settings from './components/Settings';
+// Performance Optimization:
+// Used React.lazy() and Suspense to enable code-splitting for route components.
+// This defers the loading of heavy dependencies (like Recharts in Dashboard/CostExplorer)
+// until the component is actually rendered, significantly reducing the initial JavaScript bundle size
+// and improving the initial Time to Interactive (TTI).
+const Dashboard = React.lazy(() => import('./components/Dashboard'));
+const CostExplorer = React.lazy(() => import('./components/CostExplorer'));
+const OptimizationHub = React.lazy(() => import('./components/OptimizationHub'));
+const Anomalies = React.lazy(() => import('./components/Anomalies'));
+const Settings = React.lazy(() => import('./components/Settings'));
 import { MOCK_ANOMALIES, MOCK_OPPORTUNITIES, MOCK_COST_DATA } from './constants';
 import { Bell, Search, Menu } from 'lucide-react';
 import { CostMetric, Anomaly } from './types';
@@ -126,7 +131,7 @@ const App: React.FC = () => {
         {/* Scrollable View Area */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50/50">
           <div className="max-w-7xl mx-auto">
-             {renderView()}
+             <React.Suspense fallback={<div className="p-8 flex justify-center text-slate-500">Loading...</div>}>{renderView()}</React.Suspense>
           </div>
         </main>
       </div>
