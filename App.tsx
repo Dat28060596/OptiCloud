@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import Sidebar from './components/Sidebar';
-import Dashboard from './components/Dashboard';
-import CostExplorer from './components/CostExplorer';
-import OptimizationHub from './components/OptimizationHub';
-import Anomalies from './components/Anomalies';
-import Settings from './components/Settings';
+// ⚡ Bolt Optimization: Lazy load route components to reduce initial bundle size and speed up first paint.
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const CostExplorer = lazy(() => import('./components/CostExplorer'));
+const OptimizationHub = lazy(() => import('./components/OptimizationHub'));
+const Anomalies = lazy(() => import('./components/Anomalies'));
+const Settings = lazy(() => import('./components/Settings'));
 import { MOCK_ANOMALIES, MOCK_OPPORTUNITIES, MOCK_COST_DATA } from './constants';
 import { Bell, Search, Menu } from 'lucide-react';
 import { CostMetric, Anomaly } from './types';
@@ -126,7 +127,9 @@ const App: React.FC = () => {
         {/* Scrollable View Area */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50/50">
           <div className="max-w-7xl mx-auto">
+             <Suspense fallback={<div className="flex h-full items-center justify-center p-8"><div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div></div>}>
              {renderView()}
+           </Suspense>
           </div>
         </main>
       </div>
