@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import Sidebar from './components/Sidebar';
-import Dashboard from './components/Dashboard';
-import CostExplorer from './components/CostExplorer';
-import OptimizationHub from './components/OptimizationHub';
-import Anomalies from './components/Anomalies';
-import Settings from './components/Settings';
 import { MOCK_ANOMALIES, MOCK_OPPORTUNITIES, MOCK_COST_DATA } from './constants';
 import { Bell, Search, Menu } from 'lucide-react';
 import { CostMetric, Anomaly } from './types';
+// Performance Optimization:
+// Implemented route-level code splitting using React.lazy and Suspense.
+// This reduces the initial JavaScript bundle size by deferring the loading
+// of these heavy components until they are actually rendered, significantly
+// improving the initial time-to-interactive.
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const CostExplorer = lazy(() => import('./components/CostExplorer'));
+const OptimizationHub = lazy(() => import('./components/OptimizationHub'));
+const Anomalies = lazy(() => import('./components/Anomalies'));
+const Settings = lazy(() => import('./components/Settings'));
+
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -126,7 +132,7 @@ const App: React.FC = () => {
         {/* Scrollable View Area */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50/50">
           <div className="max-w-7xl mx-auto">
-             {renderView()}
+             <Suspense fallback={<div className="flex h-full items-center justify-center"><span className="text-slate-500">Loading...</span></div>}>{renderView()}</Suspense>
           </div>
         </main>
       </div>
