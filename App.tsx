@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
-import Sidebar from './components/Sidebar';
-import Dashboard from './components/Dashboard';
-import CostExplorer from './components/CostExplorer';
-import OptimizationHub from './components/OptimizationHub';
-import Anomalies from './components/Anomalies';
-import Settings from './components/Settings';
+import React, { useState, Suspense } from 'react';
 import { MOCK_ANOMALIES, MOCK_OPPORTUNITIES, MOCK_COST_DATA } from './constants';
 import { Bell, Search, Menu } from 'lucide-react';
 import { CostMetric, Anomaly } from './types';
+
+// ⚡ Bolt: Code-splitting route components to reduce bundle size and improve initial load time
+const Sidebar = React.lazy(() => import('./components/Sidebar'));
+const Dashboard = React.lazy(() => import('./components/Dashboard'));
+const CostExplorer = React.lazy(() => import('./components/CostExplorer'));
+const OptimizationHub = React.lazy(() => import('./components/OptimizationHub'));
+const Anomalies = React.lazy(() => import('./components/Anomalies'));
+const Settings = React.lazy(() => import('./components/Settings'));
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -81,7 +83,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 flex">
-      <Sidebar currentView={currentView} onChangeView={setCurrentView} />
+      <Suspense fallback={<div className="w-64 h-screen bg-slate-900"></div>}><Sidebar currentView={currentView} onChangeView={setCurrentView} /></Suspense>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col md:ml-64 h-screen overflow-hidden">
@@ -126,7 +128,9 @@ const App: React.FC = () => {
         {/* Scrollable View Area */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50/50">
           <div className="max-w-7xl mx-auto">
-             {renderView()}
+             <Suspense fallback={<div className="p-8 text-center text-slate-500">Loading...</div>}>
+               {renderView()}
+             </Suspense>
           </div>
         </main>
       </div>
