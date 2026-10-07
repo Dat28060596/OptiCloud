@@ -1,0 +1,3 @@
+## 2024-03-05 - Lazy Loading Sidebar Network Waterfall
+**Learning:** While code-splitting route views (Dashboard, CostExplorer) with React.lazy provides excellent initial bundle size reductions, lazy-loading persistent layout components like a Sidebar creates an unnecessary network waterfall (Main chunk loads -> executes -> starts loading Sidebar chunk). Since the Sidebar is always visible and relatively small, it is better kept in the main bundle.
+**Action:** Next time, only apply React.lazy to conditionally rendered views and large route components, leaving root-level, always-visible navigation components as static imports.
