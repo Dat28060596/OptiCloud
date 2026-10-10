@@ -1,0 +1,3 @@
+## $(date +%Y-%m-%d) - Code Splitting Route Components
+**Learning:** In a single-page React app with multiple distinct views (Dashboard, Explorer, etc.), eagerly importing all view components forces the user to download the entire application logic, including heavy dependencies like charting libraries, upfront. This inflates the initial bundle size and delays time-to-interactive.
+**Action:** Always implement code splitting (using React.lazy and Suspense) for large, conditionally rendered route components to defer loading their code until the user actually navigates to them, significantly improving initial load times.
