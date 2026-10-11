@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Sidebar from './components/Sidebar';
-import Dashboard from './components/Dashboard';
-import CostExplorer from './components/CostExplorer';
-import OptimizationHub from './components/OptimizationHub';
-import Anomalies from './components/Anomalies';
-import Settings from './components/Settings';
 import { MOCK_ANOMALIES, MOCK_OPPORTUNITIES, MOCK_COST_DATA } from './constants';
 import { Bell, Search, Menu } from 'lucide-react';
 import { CostMetric, Anomaly } from './types';
+
+const Dashboard = React.lazy(() => import('./components/Dashboard'));
+const CostExplorer = React.lazy(() => import('./components/CostExplorer'));
+const OptimizationHub = React.lazy(() => import('./components/OptimizationHub'));
+const Anomalies = React.lazy(() => import('./components/Anomalies'));
+const Settings = React.lazy(() => import('./components/Settings'));
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -42,41 +43,54 @@ const App: React.FC = () => {
   };
 
   const renderView = () => {
+    let content;
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard 
+        content = <Dashboard
           onNavigate={setCurrentView} 
           anomalies={anomalies} 
           opportunities={MOCK_OPPORTUNITIES}
           fixedOpportunityIds={fixedOpportunityIds}
         />;
+        break;
       case 'explorer':
-        return <CostExplorer 
+        content = <CostExplorer
           data={costData}
           onDeleteService={handleDeleteService}
           onAddService={handleAddService}
         />;
+        break;
       case 'optimization':
-        return <OptimizationHub 
+        content = <OptimizationHub
           opportunities={MOCK_OPPORTUNITIES} 
           fixedOpportunityIds={fixedOpportunityIds}
           onFixOpportunity={handleFixOpportunity}
         />;
+        break;
       case 'anomalies':
-        return <Anomalies 
+        content = <Anomalies
           anomalies={anomalies} 
           onDismissAnomaly={handleDismissAnomaly}
         />;
+        break;
       case 'settings':
-        return <Settings />;
+        content = <Settings />;
+        break;
       default:
-        return <Dashboard 
+        content = <Dashboard
           onNavigate={setCurrentView} 
           anomalies={anomalies} 
           opportunities={MOCK_OPPORTUNITIES} 
           fixedOpportunityIds={fixedOpportunityIds}
         />;
+        break;
     }
+
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center h-full p-12 text-slate-500">Loading...</div>}>
+        {content}
+      </Suspense>
+    );
   };
 
   return (
