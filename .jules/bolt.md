@@ -1,0 +1,3 @@
+## 2024-10-21 - Implement React.lazy() for route components
+**Learning:** The main `App.tsx` imports all view components (`Dashboard`, `CostExplorer`, `OptimizationHub`, `Anomalies`, `Settings`) synchronously. This causes a large initial JavaScript bundle size, as all route components (and their dependencies, like `recharts` in Dashboard) are loaded even if the user only visits one view.
+**Action:** Use `React.lazy()` and `Suspense` for large route components that are conditionally rendered based on `currentView` to implement code splitting. This will reduce the initial JS payload and improve load times. Do not apply lazy loading to persistent components like `Sidebar`.
