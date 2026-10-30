@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
-import CostExplorer from './components/CostExplorer';
-import OptimizationHub from './components/OptimizationHub';
-import Anomalies from './components/Anomalies';
-import Settings from './components/Settings';
 import { MOCK_ANOMALIES, MOCK_OPPORTUNITIES, MOCK_COST_DATA } from './constants';
 import { Bell, Search, Menu } from 'lucide-react';
 import { CostMetric, Anomaly } from './types';
+
+const CostExplorer = React.lazy(() => import('./components/CostExplorer'));
+const OptimizationHub = React.lazy(() => import('./components/OptimizationHub'));
+const Anomalies = React.lazy(() => import('./components/Anomalies'));
+const Settings = React.lazy(() => import('./components/Settings'));
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -126,7 +127,16 @@ const App: React.FC = () => {
         {/* Scrollable View Area */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50/50">
           <div className="max-w-7xl mx-auto">
-             {renderView()}
+             {/*
+               ⚡ Bolt Performance Optimization:
+               Wrapped route components in React.Suspense to enable code splitting.
+               This defers loading heavy UI components (CostExplorer, OptimizationHub, etc.)
+               until they are actively navigated to.
+               Expected Impact: Reduces initial JavaScript bundle size, improving Time To Interactive (TTI).
+             */}
+             <Suspense fallback={<div className="flex items-center justify-center h-full text-slate-500">Loading...</div>}>
+               {renderView()}
+             </Suspense>
           </div>
         </main>
       </div>
