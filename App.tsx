@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Sidebar from './components/Sidebar';
-import Dashboard from './components/Dashboard';
-import CostExplorer from './components/CostExplorer';
-import OptimizationHub from './components/OptimizationHub';
-import Anomalies from './components/Anomalies';
-import Settings from './components/Settings';
 import { MOCK_ANOMALIES, MOCK_OPPORTUNITIES, MOCK_COST_DATA } from './constants';
 import { Bell, Search, Menu } from 'lucide-react';
 import { CostMetric, Anomaly } from './types';
+// ⚡ Bolt Performance Optimization:
+// What: Implemented code splitting using React.lazy and Suspense for main route components.
+// Why: Reduces the initial JavaScript bundle size by deferring the loading of heavy view components until they are actually navigated to.
+// Impact: Expected to significantly improve initial page load time (First Contentful Paint) and Time to Interactive by avoiding downloading and parsing unused code upfront.
+// Measurement: Verify improvement by checking network panel for smaller initial JS bundle and deferred chunk loading on navigation.
+const Dashboard = React.lazy(() => import('./components/Dashboard'));
+const CostExplorer = React.lazy(() => import('./components/CostExplorer'));
+const OptimizationHub = React.lazy(() => import('./components/OptimizationHub'));
+const Anomalies = React.lazy(() => import('./components/Anomalies'));
+const Settings = React.lazy(() => import('./components/Settings'));
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -126,7 +131,9 @@ const App: React.FC = () => {
         {/* Scrollable View Area */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50/50">
           <div className="max-w-7xl mx-auto">
-             {renderView()}
+             <Suspense fallback={<div className="p-8 text-slate-500">Loading...</div>}>
+               {renderView()}
+             </Suspense>
           </div>
         </main>
       </div>
